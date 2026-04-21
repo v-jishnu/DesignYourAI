@@ -1,0 +1,20 @@
+# Example sources file
+# Add one source per line (URLs or file paths)
+
+# Web sources (URLs)
+# https://www.example.com/ai-interview-questions
+# https://www.example.com/ml-mcqs
+
+# Local PDF files
+# data/raw/ai_questions.pdf
+# data/raw/ml_interview_prep.pdf
+
+# Local DOCX files
+# data/raw/data_science_mcqs.docx
+# data/raw/system_design_questions.docx
+
+# INSTRUCTIONS:
+# 1. Uncomment and replace with your actual sources
+# 2. One source per line
+# 3. Lines starting with # are ignored
+# 4. Run with: python main.py --batch sources_example.txt

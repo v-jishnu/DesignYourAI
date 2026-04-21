@@ -1,0 +1,196 @@
+================================================================================
+COMMAND PROMPT GUIDE - Easiest Way to Use This System
+================================================================================
+
+WHY COMMAND PROMPT?
+  - No execution policy issues
+  - Works immediately
+  - Simpler for this use case
+  - Activation shows (venv) prefix clearly
+
+================================================================================
+SETUP (5 minutes)
+================================================================================
+
+Step 1: Open Command Prompt
+   - Press: Win + R
+   - Type: cmd
+   - Press: Enter
+
+Step 2: Navigate to Project
+   cd C:\DesignYourAI
+
+Step 3: Activate Virtual Environment
+   .venv\Scripts\activate.bat
+
+   You'll see:
+   (venv) C:\DesignYourAI>
+
+Step 4: Add API Key (First Time Only)
+   notepad .env
+
+   Add this line:
+   GEMINI_API_KEY=AIza...your-key-here...
+
+   Get key from: https://makersuite.google.com/app/apikey
+
+Step 5: Test System
+   python test_sample.py
+
+   Expected:
+   ✅ Created 3 sample MCQs
+   ✅ ALL TESTS PASSED!
+
+================================================================================
+DAILY USAGE
+================================================================================
+
+Every time you use the system:
+
+1. Open Command Prompt (Win+R, type cmd)
+
+2. cd C:\DesignYourAI
+
+3. .venv\Scripts\activate.bat
+   (You'll see: (venv) C:\DesignYourAI>)
+
+4. python main.py --sources "URL"
+   (Process one link)
+
+5. Check Excel file
+   (Open: data\knowledge_base\mcq_knowledge_base.xlsx)
+
+6. Repeat step 4 with next URL
+   (Until 800 MCQs)
+
+7. deactivate
+   (When done)
+
+================================================================================
+COMPLETE EXAMPLE SESSION
+================================================================================
+
+C:\> cd C:\DesignYourAI
+
+C:\DesignYourAI> .venv\Scripts\activate.bat
+
+(venv) C:\DesignYourAI> python test_sample.py
+✅ Created 3 sample MCQs
+✅ ALL TESTS PASSED!
+
+(venv) C:\DesignYourAI> python main.py --sources "https://example.com/mcqs"
+🚀 Starting ingestion workflow...
+✅ Extracted 35 MCQs
+✅ Classified 35 MCQs
+✅ Stored 33 MCQs (2 duplicates)
+📊 Total: 33/800 (4.1%)
+
+(venv) C:\DesignYourAI> python main.py --sources "https://another-site.com/questions"
+🚀 Starting ingestion workflow...
+✅ Extracted 40 MCQs
+✅ Stored 38 MCQs
+📊 Total: 71/800 (8.9%)
+
+(venv) C:\DesignYourAI> deactivate
+
+C:\DesignYourAI>
+
+================================================================================
+KEY COMMANDS (Command Prompt)
+================================================================================
+
+cd C:\DesignYourAI                    Navigate to project
+.venv\Scripts\activate.bat            Activate virtual environment
+python test_sample.py                 Test system
+python main.py --sources "URL"        Process MCQs from one source
+where python                          Check Python location
+deactivate                            Exit virtual environment
+
+================================================================================
+VERIFICATION
+================================================================================
+
+Are you activated?
+
+✅ ACTIVATED:
+(venv) C:\DesignYourAI>
+
+❌ NOT ACTIVATED:
+C:\DesignYourAI>
+
+Check Python location:
+where python
+
+Should show:
+C:\DesignYourAI\.venv\Scripts\python.exe  ✅
+
+NOT this:
+C:\Users\...\AppData\Local\...  ❌
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Problem: "python not found"
+Solution: Activate first: .venv\Scripts\activate.bat
+
+Problem: "google-generativeai not found"
+Solution: Activate first: .venv\Scripts\activate.bat
+
+Problem: Wrong Python location
+Solution: Make sure you see (venv) in prompt
+
+Problem: Want to use PowerShell instead
+Solution: See POWERSHELL_FIX.md for execution policy setup
+
+================================================================================
+COMPARISON: Command Prompt vs PowerShell
+================================================================================
+
+Command Prompt (cmd):
+✅ No execution policy issues
+✅ Works immediately
+✅ Simpler activation
+✅ Clear (venv) prefix
+✅ Recommended for this project
+
+PowerShell:
+⚠️  Requires execution policy change
+⚠️  More complex activation
+⚠️  May need admin privileges
+✅ More powerful for advanced users
+
+FOR THIS PROJECT: Use Command Prompt (cmd) - simpler and works!
+
+================================================================================
+QUICK START CHECKLIST
+================================================================================
+
+□ Open Command Prompt (Win+R, cmd)
+□ cd C:\DesignYourAI
+□ .venv\Scripts\activate.bat
+□ See (venv) in prompt
+□ Add GEMINI_API_KEY to .env
+□ python test_sample.py
+□ Should pass all tests
+□ python main.py --sources "URL"
+□ Process your MCQ sources!
+
+================================================================================
+REMEMBER
+================================================================================
+
+1. Always use Command Prompt (not PowerShell) - easier!
+2. Always activate first: .venv\Scripts\activate.bat
+3. Look for (venv) prefix in prompt
+4. Process one URL at a time
+5. Deactivate when done
+
+Cost: $0 with FREE Gemini API
+Impact on other projects: None (isolated environment)
+
+================================================================================
+
+QUESTIONS? Check START_HERE.md or README.md
+
+Happy ingesting! 🚀

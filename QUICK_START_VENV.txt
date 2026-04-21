@@ -1,0 +1,175 @@
+================================================================================
+MCQ INGESTION SYSTEM - QUICK START WITH VIRTUAL ENVIRONMENT
+================================================================================
+
+✅ ISOLATED ENVIRONMENT - Won't affect your other Python projects!
+
+================================================================================
+SETUP (One-time, 5 minutes)
+================================================================================
+
+Step 1: Get FREE Gemini API Key
+   → Visit: https://makersuite.google.com/app/apikey
+   → Click "Get API Key"
+   → Copy key (starts with AIza...)
+
+Step 2: Configure
+   → Open: .env
+   → Add:
+     LLM_PROVIDER=gemini
+     GEMINI_API_KEY=AIza...your-key...
+
+Step 3: Activate Virtual Environment
+   → Run: activate.bat
+   → You'll see: (.venv) in your prompt
+
+Step 4: Install Dependencies (isolated)
+   → Run: pip install --index-url https://pypi.org/simple -r requirements.txt
+   → Wait ~2 minutes
+
+Step 5: Test
+   → Run: python test_sample.py
+   → Expected: ✅ ALL TESTS PASSED!
+
+================================================================================
+DAILY USAGE (Every time you use the system)
+================================================================================
+
+Step 1: Activate Virtual Environment
+   → Run: activate.bat
+   → Look for: (.venv) in prompt
+
+Step 2: Process ONE Link
+   → Run: python main.py --sources "https://example.com/mcqs"
+   → Wait 1-3 minutes
+
+Step 3: Check Results
+   → Open: data\knowledge_base\mcq_knowledge_base.xlsx
+   → Verify new MCQs added
+
+Step 4: Process Next Link
+   → Run: python main.py --sources "next-url"
+   → Repeat until 800 MCQs!
+
+Step 5: Deactivate When Done
+   → Run: deactivate
+
+================================================================================
+IMPORTANT NOTES
+================================================================================
+
+⚠️  ALWAYS run "activate.bat" first!
+    Without it, you'll get "google-generativeai not found" error
+
+✅  Virtual environment (.venv) is ISOLATED
+    - Won't affect other Python projects
+    - No version conflicts
+    - Safe to experiment
+
+✅  One link at a time workflow
+    - Simple and controlled
+    - Easy to track progress
+    - No complexity!
+
+💰  100% FREE with Gemini
+    - No credit card needed
+    - 1500 requests/day
+    - More than enough!
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Problem: "google-generativeai not found"
+Solution: Run activate.bat first
+
+Problem: "pip install fails with 401 error"
+Solution: Use --index-url https://pypi.org/simple
+
+Problem: ".venv not found"
+Solution: Run: python -m venv .venv
+
+Problem: "Can't activate in PowerShell"
+Solution: Use Command Prompt (cmd) instead
+
+================================================================================
+FILES TO KNOW
+================================================================================
+
+activate.bat              → Activates virtual environment (run this first!)
+.env                      → Your API key configuration
+test_sample.py            → Verify system works
+main.py                   → Process MCQs from sources
+data/.../mcq_...xlsx      → Your MCQ knowledge base (output)
+
+VENV_SETUP.md             → Detailed virtual environment guide
+FREE_API_SETUP.md         → Complete FREE API setup guide
+README.md                 → Project overview
+
+================================================================================
+QUICK COMMAND REFERENCE
+================================================================================
+
+# Activate environment (do this first!)
+activate.bat
+
+# Test system
+python test_sample.py
+
+# Process single link
+python main.py --sources "URL"
+
+# Deactivate when done
+deactivate
+
+================================================================================
+WORKFLOW VISUALIZATION
+================================================================================
+
+┌─────────────────────┐
+│ 1. activate.bat     │  (Every time you start)
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ 2. Get one URL      │  (Find MCQ source)
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ 3. Run main.py      │  python main.py --sources "URL"
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ 4. Wait 1-3 min     │  (Extract→Classify→Dedup→Store)
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ 5. Check Excel      │  (Verify MCQs added)
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ 6. Next URL         │  (Repeat until 800 MCQs)
+└─────────────────────┘
+
+================================================================================
+YOU'RE READY!
+================================================================================
+
+1. ✅ Run activate.bat
+2. ✅ Add Gemini API key to .env
+3. ✅ Run python test_sample.py
+4. ✅ Start processing MCQs!
+
+Questions? Check VENV_SETUP.md or FREE_API_SETUP.md
+
+💰 Cost: $0 with FREE Gemini API
+🔒 Isolated: Won't affect other projects
+📦 Simple: One command at a time
+
+Happy ingesting! 🚀
+
+================================================================================

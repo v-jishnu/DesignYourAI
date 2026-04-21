@@ -1,0 +1,30 @@
+# Core
+pandas==2.1.4
+openpyxl==3.1.2
+python-dotenv==1.0.0
+
+# Web Scraping
+beautifulsoup4==4.12.2  # Static HTML parsing
+aiohttp==3.9.1          # Async HTTP requests
+lxml==5.1.0             # HTML parser for BeautifulSoup
+playwright==1.40.0      # Browser automation for JavaScript-rendered sites
+
+# Document Parsing
+pdfplumber==0.10.3
+python-docx==1.1.0
+
+# LLM APIs (multiple providers supported)
+google-generativeai==0.3.2  # Gemini (FREE TIER - RECOMMENDED)
+anthropic==0.18.1           # Claude (paid)
+openai==1.10.0              # OpenAI/Groq/Together.ai compatible
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# Utilities
+tenacity==8.2.3
+
+# Image handling
+Pillow==10.1.0           # Image processing, optimization, format conversion
+imagehash==4.3.1         # Perceptual hashing for visual deduplication

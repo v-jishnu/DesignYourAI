@@ -1,0 +1,70 @@
+================================================================================
+MCQ INGESTION SYSTEM - CHEAT SHEET (PowerShell)
+================================================================================
+
+SETUP (One-time)
+================================================================================
+1. Get Gemini API key: https://makersuite.google.com/app/apikey
+2. Edit .env: Add GEMINI_API_KEY=AIza...your-key...
+3. Activate: .\activate_venv.bat
+4. Install: pip install --index-url https://pypi.org/simple -r requirements.txt
+5. Test: python test_sample.py
+
+DAILY USAGE
+================================================================================
+1. .\activate_venv.bat              # Activate (see .venv in prompt)
+2. python main.py --sources "URL"   # Process one link
+3. Check Excel file                 # Verify results
+4. Repeat step 2 with next URL      # Until 800 MCQs
+5. deactivate                       # When done
+
+KEY COMMANDS (PowerShell)
+================================================================================
+.\activate_venv.bat                 # Activate virtual environment
+python test_sample.py               # Test system
+python main.py --sources "URL"      # Process single source
+deactivate                          # Exit virtual environment
+where.exe python                    # Check if activated
+
+IMPORTANT
+================================================================================
+⚠️  PowerShell requires .\ prefix: .\activate_venv.bat (NOT activate_venv.bat)
+✅  Always activate before using: Look for (.venv) in prompt
+💰  100% FREE with Gemini API
+🔒  Isolated environment won't affect other projects
+
+FILES
+================================================================================
+activate_venv.bat         # Main activation script
+.env                      # Your API key config
+test_sample.py            # System verification
+main.py                   # MCQ processor
+data/.../mcq_...xlsx      # Output knowledge base
+
+HELP
+================================================================================
+POWERSHELL_FIX.md         # PowerShell activation guide
+README.md                 # Full documentation
+FREE_API_SETUP.md         # API setup guide
+VENV_SETUP.md             # Virtual environment details
+
+TROUBLESHOOTING
+================================================================================
+"activate.bat not recognized"   → Use .\activate_venv.bat (with .\)
+"google-generativeai not found" → Activate venv first
+"Execution policy error"        → Use .bat file (not .ps1)
+"401 pip error"                 → Use --index-url https://pypi.org/simple
+
+WORKFLOW EXAMPLE
+================================================================================
+PS C:\DesignYourAI> .\activate_venv.bat
+(.venv) PS C:\DesignYourAI> python test_sample.py
+✅ ALL TESTS PASSED!
+(.venv) PS C:\DesignYourAI> python main.py --sources "https://site.com/mcqs"
+✅ Stored 35 MCQs (35/800)
+(.venv) PS C:\DesignYourAI> python main.py --sources "https://next-site.com/mcqs"
+✅ Stored 40 MCQs (75/800)
+(.venv) PS C:\DesignYourAI> deactivate
+PS C:\DesignYourAI>
+
+================================================================================

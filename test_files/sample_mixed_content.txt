@@ -1,0 +1,40 @@
+AI/ML Interview Questions
+
+=== STRUCTURED MCQs ===
+
+1. What is the primary advantage of using a convolutional neural network (CNN) for image recognition?
+A) CNNs process images faster than traditional neural networks
+B) CNNs can automatically learn spatial hierarchies and features from images
+C) CNNs require less training data than other architectures
+D) CNNs eliminate the need for image preprocessing
+
+2. In a binary classification problem, what does the ROC curve plot?
+A) Precision vs Recall
+B) True Positive Rate vs False Positive Rate
+C) Accuracy vs F1 Score
+D) Loss vs Number of Epochs
+
+=== DESCRIPTIVE Q&A FORMAT ===
+
+Q: What is the vanishing gradient problem in deep learning?
+A: The vanishing gradient problem occurs when gradients become extremely small during backpropagation through deep networks, making it difficult for early layers to learn. This happens because gradients are multiplied repeatedly through each layer, and if they're less than 1, they exponentially decrease. Solutions include using activation functions like ReLU, batch normalization, or skip connections.
+
+Q: What is the difference between bagging and boosting?
+A: Bagging (Bootstrap Aggregating) trains multiple models independently on different subsets of data and combines their predictions through voting or averaging. Boosting trains models sequentially, where each new model focuses on correcting the errors of previous models. Bagging reduces variance, while boosting reduces bias.
+
+Question: What is the purpose of dropout in neural networks?
+Answer: Dropout is a regularization technique that randomly deactivates a fraction of neurons during training. This prevents the network from becoming too dependent on specific neurons and encourages more robust feature learning. During inference, all neurons are active but their outputs are scaled to account for the dropout rate used during training.
+
+=== MORE MCQs ===
+
+3. Which activation function is most commonly used in hidden layers of modern deep neural networks?
+(a) Sigmoid
+(b) Tanh
+(c) ReLU
+(d) Softmax
+
+4. What is the time complexity of the K-Nearest Neighbors (KNN) algorithm for prediction?
+a. O(1)
+b. O(log n)
+c. O(n)
+d. O(n log n)

@@ -1,0 +1,257 @@
+================================================================================
+  MCQ INGESTION SYSTEM - QUICK START GUIDE (FREE API)
+================================================================================
+
+📚 WHAT THIS DOES:
+   Automatically extracts interview MCQs from websites/PDFs
+   Classifies them using FREE Gemini AI
+   Stores in organized Excel database
+
+💰 COST: $0 (100% FREE with Gemini)
+
+⏱️  SETUP TIME: 5 minutes
+
+================================================================================
+  STEP 1: GET FREE API KEY (2 minutes)
+================================================================================
+
+   1. Visit: https://makersuite.google.com/app/apikey
+   2. Click: "Get API Key"
+   3. Copy: Your key (starts with AIza...)
+
+================================================================================
+  STEP 2: CONFIGURE (1 minute)
+================================================================================
+
+   1. Open .env file:
+      notepad .env
+
+   2. Add these lines:
+      LLM_PROVIDER=gemini
+      GEMINI_API_KEY=AIza...paste-your-key-here...
+
+   3. Save and close
+
+================================================================================
+  STEP 3: INSTALL DEPENDENCIES (1 minute)
+================================================================================
+
+   pip install google-generativeai openai
+
+   OR reinstall all:
+   pip install -r requirements.txt
+
+================================================================================
+  STEP 4: TEST (1 minute)
+================================================================================
+
+   python test_sample.py
+
+   Expected: ✅ ALL TESTS PASSED!
+
+================================================================================
+  STEP 5: USE! (One link at a time)
+================================================================================
+
+   Command format:
+   python main.py --sources "YOUR_URL_HERE"
+
+   Example:
+   python main.py --sources "https://www.geeksforgeeks.org/machine-learning-mcqs/"
+
+   Wait for completion, then process next link!
+
+================================================================================
+  WORKFLOW (REPEAT UNTIL 800 MCQs)
+================================================================================
+
+   1. Find MCQ source (website or PDF)
+      ↓
+   2. Run command with that ONE source
+      ↓
+   3. Wait 1-3 minutes (system processes)
+      ↓
+   4. Check Excel file (data/knowledge_base/mcq_knowledge_base.xlsx)
+      ↓
+   5. Get next source and repeat!
+
+================================================================================
+  WHAT HAPPENS WHEN YOU RUN:
+================================================================================
+
+   STEP 1: Extraction
+   → Fetches webpage/PDF
+   → Finds all MCQ questions
+   → Extracts question + 4 options
+
+   STEP 2: Classification (FREE Gemini AI)
+   → Sends to Gemini API
+   → AI determines:
+     • Category: Conceptual/Mathematical/Application
+     • Topic: AI/ML/Data Science/System Design
+     • Difficulty: Easy/Medium/Hard
+
+   STEP 3: Deduplication
+   → Checks against existing MCQs
+   → Removes duplicates
+   → Keeps only unique ones
+
+   STEP 4: Storage
+   → Saves to Excel file
+   → Creates backup
+   → Updates count
+
+================================================================================
+  EXAMPLE OUTPUT:
+================================================================================
+
+   🚀 Starting ingestion workflow...
+
+   ✅ STEP 1: Extracted 35 MCQs
+   ✅ STEP 2: Classified 35 MCQs with Gemini
+   ✅ STEP 3: Found 2 duplicates, 33 unique
+   ✅ STEP 4: Stored 33 MCQs
+
+   ========================================
+   RESULT:
+   ✅ Extracted: 35 MCQs
+   ✅ Stored: 33 MCQs
+   📊 Progress: 33/800 (4.1%)
+   💰 Cost: $0 (FREE!)
+   ========================================
+
+================================================================================
+  OUTPUT FILE:
+================================================================================
+
+   Location: data/knowledge_base/mcq_knowledge_base.xlsx
+
+   Columns:
+   - Question_ID
+   - Question_Text
+   - Option_A, Option_B, Option_C, Option_D
+   - Correct_Answer (if available)
+   - Explanation (if available)
+   - Category (Conceptual/Mathematical/Application)
+   - Topic (AI/ML/Data Science/System Design)
+   - Difficulty (Easy/Medium/Hard)
+   - Source (URL or file path)
+   - Date_Added
+   - Used_Status (for posting automation)
+
+================================================================================
+  TIPS:
+================================================================================
+
+   ✅ Process ONE link at a time (simple workflow)
+   ✅ Check Excel file after each run
+   ✅ Keep a list of sources you've processed
+   ✅ Gemini limit: 1,500 requests/day (more than enough!)
+
+   ❌ Don't batch multiple links (keep it simple)
+   ❌ Don't rush - let each run complete
+
+================================================================================
+  TROUBLESHOOTING:
+================================================================================
+
+   Problem: "API key not found"
+   → Check .env file has GEMINI_API_KEY filled in
+
+   Problem: "No MCQs extracted"
+   → Source doesn't have clear MCQ format
+   → Try different source
+
+   Problem: "google-generativeai not installed"
+   → Run: pip install google-generativeai
+
+   Problem: "Rate limit exceeded"
+   → Wait 1 minute and try again
+
+================================================================================
+  NEED HELP?
+================================================================================
+
+   📖 Quick Guide: SIMPLE_USER_MANUAL.md
+   📖 Detailed Setup: FREE_API_SETUP.md
+   📖 Full Docs: USAGE.md
+
+   🧪 Run test: python test_sample.py
+   📊 Check logs: logs/app.log
+
+================================================================================
+  EXAMPLE SESSION (800 MCQs):
+================================================================================
+
+   Day 1:
+   python main.py --sources "https://site1.com/ai-mcqs"
+   → 35 MCQs added (Total: 35/800)
+
+   python main.py --sources "https://site2.com/ml-questions"
+   → 40 MCQs added (Total: 75/800)
+
+   python main.py --sources "https://site3.com/ds-interview"
+   → 50 MCQs added (Total: 125/800)
+
+   Day 2:
+   python main.py --sources "https://site4.com/system-design"
+   → 45 MCQs added (Total: 170/800)
+
+   ... continue until 800 ...
+
+   Result: 800+ MCQs organized in Excel, ready for posting automation!
+
+================================================================================
+  QUICK COMMAND REFERENCE:
+================================================================================
+
+   Test system:
+   python test_sample.py
+
+   Process single URL:
+   python main.py --sources "https://example.com/mcqs"
+
+   Process PDF file:
+   python main.py --sources "data/raw/questions.pdf"
+
+   Process DOCX file:
+   python main.py --sources "data/raw/interview.docx"
+
+================================================================================
+  FREE API COMPARISON:
+================================================================================
+
+   Gemini (RECOMMENDED):
+   - Free: 1,500 requests/day
+   - Quality: Excellent
+   - Speed: Fast
+   - Best for: This use case
+
+   Groq (Alternative):
+   - Free: Limited
+   - Quality: Good
+   - Speed: Very fast
+   - Best for: Speed enthusiasts
+
+   Together.ai (Alternative):
+   - Free: Credits
+   - Quality: Good
+   - Speed: Medium
+   - Best for: Experimenting
+
+================================================================================
+  YOU'RE READY! 🚀
+================================================================================
+
+   1. Get Gemini API key (2 min)
+   2. Add to .env file (1 min)
+   3. Run test (1 min)
+   4. Start processing MCQs!
+
+   GOAL: 800 MCQs in Excel database
+   COST: $0 (FREE!)
+   TIME: A few hours spread over days
+
+   Good luck! 🎉
+
+================================================================================
