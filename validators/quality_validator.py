@@ -32,7 +32,8 @@ class QualityValidator:
             'plausible_distractors': self._check_distractors(mcq, strict=strict),
             'differentiates_levels': self._check_differentiation(mcq, strict=strict),
             'logically_sound': self._check_logic(mcq),
-            'industry_rigor': self._check_rigor(mcq, strict=strict)
+            'industry_rigor': self._check_rigor(mcq, strict=strict),
+            'answer_explanation_consistent': self._check_answer_explanation_consistency(mcq),
         }
 
         # All checks must pass
@@ -216,6 +217,35 @@ class QualityValidator:
 
         return True
 
+    def _check_answer_explanation_consistency(self, mcq: MCQ) -> bool:
+        """
+        Check 6: The explanation is consistent with the declared correct answer.
+
+        Heuristic: at least one significant word (>4 chars) from the correct option's
+        text should appear in the explanation. This catches the common failure where the
+        LLM's explanation describes a different option than the one marked correct —
+        which is the primary source of wrong-answer generation after shuffling.
+
+        Returns True if explanation is absent/short (not enough signal to judge).
+        """
+        if not mcq.explanation or len(mcq.explanation.strip()) < 20:
+            return True  # No explanation to cross-check; other checks cover this
+
+        option_map = {'A': mcq.option_a, 'B': mcq.option_b,
+                      'C': mcq.option_c, 'D': mcq.option_d}
+        correct_option = option_map.get(mcq.correct_answer, '')
+        if not correct_option:
+            return False
+
+        explanation_lower = mcq.explanation.lower()
+        correct_words = [w.lower() for w in correct_option.split() if len(w) > 4]
+
+        if not correct_words:
+            return True  # Option too short to extract signal words
+
+        overlap = sum(1 for w in correct_words if w in explanation_lower)
+        return overlap >= max(1, len(correct_words) // 3)
+
     def batch_validate(self, mcqs: List[MCQ]) -> Tuple[List[MCQ], List[Tuple[MCQ, str]], dict]:
         """
         Validate batch of MCQs.
@@ -238,7 +268,8 @@ class QualityValidator:
                 'plausible_distractors': 0,
                 'differentiates_levels': 0,
                 'logically_sound': 0,
-                'industry_rigor': 0
+                'industry_rigor': 0,
+                'answer_explanation_consistent': 0,
             }
         }
 

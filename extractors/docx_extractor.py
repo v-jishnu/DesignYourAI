@@ -277,13 +277,12 @@ class DOCXExtractor(BaseExtractor):
                 return None
 
             correct_idx = ord(correct_letter) - ord('A')
-            correct_text = options[correct_idx]
 
-            # Shuffle all options randomly (fixes always-C bias)
-            random.shuffle(options)
-
-            # Find where the correct answer landed after shuffle
-            new_correct_idx = options.index(correct_text)
+            # Shuffle by index so duplicate option text can't mismatch the correct answer
+            indices = list(range(4))
+            random.shuffle(indices)
+            options = [options[i] for i in indices]
+            new_correct_idx = indices.index(correct_idx)
             new_correct_letter = chr(ord('A') + new_correct_idx)
 
             # Validate category

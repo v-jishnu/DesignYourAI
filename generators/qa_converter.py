@@ -17,7 +17,7 @@ import uuid
 from typing import Optional
 
 from config.schemas import MCQ
-from classifiers.prompt_templates import get_maang_prompt
+from classifiers.prompt_templates import get_maang_prompt, QA_CONVERSION_PROMPT
 from validators.quality_validator import QualityValidator
 
 
@@ -62,17 +62,19 @@ class QAConverter:
             try:
                 self.logger.info(f"Converting Q&A to MAANG {category} MCQ: {question[:60]}...")
 
-                # Use category-specific MAANG prompt with few-shot examples
-                content_block = f"Question: {question}\nAnswer: {answer}"
-                prompt = get_maang_prompt(category, content_block)
+                # Use the QA conversion prompt which anchors the ground-truth answer.
+                # The MAANG prompts are for free generation; using them here lets the
+                # LLM ignore the provided answer and invent its own correct option.
+                prompt = QA_CONVERSION_PROMPT.format(question=question, answer=answer)
 
                 # Call LLM with retry for rate limiting
                 response = await self._call_llm_with_retry(prompt)
                 if not response:
                     continue
 
-                # Parse response (expects JSON array, take first MCQ)
-                mcqs_data = self._parse_llm_response(response)
+                # Parse response. QA_CONVERSION_PROMPT doesn't return question_text
+                # (it keeps the original), so inject it before field validation.
+                mcqs_data = self._parse_llm_response(response, original_question=question)
                 if not mcqs_data:
                     self.logger.warning("No valid MCQs in LLM response")
                     continue
@@ -209,12 +211,15 @@ class QAConverter:
 
         return None
 
-    def _parse_llm_response(self, response_text: str) -> list:
+    def _parse_llm_response(self, response_text: str, original_question: str = None) -> list:
         """
-        Parse LLM JSON response (expects array format from MAANG prompts).
+        Parse LLM JSON response. Handles both array (MAANG prompts) and object
+        (QA_CONVERSION_PROMPT) formats. When original_question is provided, it is
+        injected as question_text so the ground-truth question is always preserved.
 
         Args:
             response_text: Raw LLM response
+            original_question: Original Q&A question text to inject if LLM omits it
 
         Returns:
             List of MCQ dictionaries with validated fields
@@ -231,14 +236,19 @@ class QAConverter:
                 text = text.rsplit('```', 1)[0]
             text = text.strip()
 
-            # Find JSON array boundaries
-            start = text.find('[')
-            end = text.rfind(']')
-            if start != -1 and end != -1:
-                text = text[start:end + 1]
+            # Prefer JSON array; fall back to object if no array found
+            arr_start = text.find('[')
+            obj_start = text.find('{')
+            if arr_start != -1 and (obj_start == -1 or arr_start < obj_start):
+                end = text.rfind(']')
+                if end != -1:
+                    text = text[arr_start:end + 1]
+            elif obj_start != -1:
+                end = text.rfind('}')
+                if end != -1:
+                    text = text[obj_start:end + 1]
 
             # Fix invalid JSON escapes (e.g. \beta, \alpha from LaTeX)
-            # Replace invalid \X sequences with \\X so JSON parser accepts them
             import re
             text = re.sub(r'\\([^"\\/bfnrtu])', r'\\\\\1', text)
 
@@ -247,6 +257,12 @@ class QAConverter:
             if not isinstance(data, list):
                 self.logger.warning("LLM response is not a JSON array, wrapping in array")
                 data = [data]
+
+            # Inject original question when the prompt doesn't return question_text
+            if original_question:
+                for item in data:
+                    if 'question_text' not in item or not item.get('question_text'):
+                        item['question_text'] = original_question
 
             # Validate each MCQ has required fields
             required = ['question_text', 'option_a', 'option_b', 'option_c', 'option_d', 'correct_answer']
@@ -287,13 +303,12 @@ class QAConverter:
                 return None
 
             correct_idx = ord(correct_letter) - ord('A')
-            correct_text = options[correct_idx]
 
-            # Shuffle all options randomly (fixes always-C bias)
-            random.shuffle(options)
-
-            # Find where the correct answer landed after shuffle
-            new_correct_idx = options.index(correct_text)
+            # Shuffle by index so duplicate option text can't mismatch the correct answer
+            indices = list(range(4))
+            random.shuffle(indices)
+            options = [options[i] for i in indices]
+            new_correct_idx = indices.index(correct_idx)
             new_correct_letter = chr(ord('A') + new_correct_idx)
 
             # Validate category

@@ -21,6 +21,7 @@ from extractors.base_extractor import BaseExtractor
 from config.schemas import MCQ
 from utils.text_processor import extract_option_text
 from validators.quality_validator import QualityValidator
+from classifiers.prompt_templates import get_universal_extraction_prompt
 
 
 class PDFExtractor(BaseExtractor):
@@ -74,7 +75,13 @@ class PDFExtractor(BaseExtractor):
                 self.log(f"No meaningful text extracted from {source_name}", 'warning')
                 return []
 
-            # 2. Quick check: try regex extraction for perfectly structured MCQs (fast, no API call)
+            # 2a. Try tabular extraction (handles "Q | A | B | C | D | Correct" table PDFs)
+            tabular_mcqs = self._parse_tabular_mcqs(full_text, str(source))
+            if tabular_mcqs:
+                self.log(f"Tabular extraction: {len(tabular_mcqs)} MCQs with explicit correct answers")
+                return tabular_mcqs
+
+            # 2b. Try regex extraction for A) B) C) D) formatted MCQs
             regex_mcqs = self._parse_mcq_text(full_text, str(source))
 
             if regex_mcqs:
@@ -176,33 +183,65 @@ class PDFExtractor(BaseExtractor):
 
         return all_mcqs
 
+    def _has_existing_mcqs(self, text: str) -> bool:
+        """Detect whether text contains structured questions with A/B/C/D options."""
+        option_markers = sum(1 for m in ['A)', 'B)', 'C)', 'D)', '(a)', '(b)', '(c)', '(d)'] if m in text)
+        tabular_answers = len(re.findall(r'\t[A-D]\s*$', text, re.MULTILINE))
+        return option_markers >= 4 or tabular_answers >= 2
+
+    def _has_embedded_answers(self, text: str) -> bool:
+        """Detect whether the text already contains an inline answer key."""
+        answer_markers = len(re.findall(r'\b[Aa]nswer\s*[:\-]?\s*[A-Da-d]\b', text))
+        tabular_answers = len(re.findall(r'\t[A-D]\s*$', text, re.MULTILINE))
+        # e.g. "1. (c) Explanation..." style answer sections
+        detailed_answers = len(re.findall(r'^\d+\.\s*\([a-dA-D]\)', text, re.MULTILINE))
+        return answer_markers >= 2 or tabular_answers >= 2 or detailed_answers >= 3
+
     async def _extract_batch_with_distribution(self, text: str, source: str) -> List[MCQ]:
         """
-        Extract MCQs from batch with lightweight prompt (no few-shot to avoid 413 errors).
+        Extract MCQs from a text batch using one of three strategies:
 
-        This method:
-        1. Uses minimal, lightweight extraction prompt
-        2. Generates with 50/25/25 distribution
-        3. Skips few-shot examples to stay under Groq API limits
+        1. Questions + embedded answers → UNIVERSAL_EXTRACTION_PROMPT (preserve answers)
+        2. Questions without answers → _get_answer_verification_prompt (LLM reasons the answer)
+        3. Prose content → lightweight generation prompt (LLM creates MCQs from scratch)
 
-        Args:
-            text: Text batch (~1500 chars after splitting)
-            source: Source file path
-
-        Returns:
-            List of MCQ objects with distribution enforced
+        Strategy 2 is the critical fix: when a PDF has questions+options but no answer key
+        in the same batch, the LLM must reason through the correct answer using its knowledge
+        rather than being asked to "generate" — which caused it to ignore existing questions
+        and produce ~53% wrong answers.
         """
-        # Estimate how many questions this batch can yield
-        estimated_questions = max(2, len(text) // 400)  # ~1 question per 400 chars
+        has_questions = self._has_existing_mcqs(text)
+        has_answers = self._has_embedded_answers(text)
 
-        # Calculate distribution (50/25/25)
+        if has_questions and has_answers:
+            # Answers already present — extract and preserve them
+            self.log("Questions + answers detected — preserving existing answers")
+            prompt = get_universal_extraction_prompt(text)
+            response = await self._call_llm_with_retry(prompt)
+            if not response:
+                return []
+            mcqs_data = self._parse_llm_response(response)
+            return [mcq for data in mcqs_data
+                    if (mcq := self._create_mcq_with_shuffle(data, source))]
+
+        if has_questions and not has_answers:
+            # Questions present but no answer key — LLM must reason the correct answer
+            self.log("Questions without answers detected — LLM will reason correct answers")
+            prompt = self._get_answer_verification_prompt(text)
+            response = await self._call_llm_with_retry(prompt)
+            if not response:
+                return []
+            mcqs_data = self._parse_llm_response(response)
+            return [mcq for data in mcqs_data
+                    if (mcq := self._create_mcq_with_shuffle(data, source))]
+
+        # Prose content — generate new MCQs with 50/25/25 distribution
+        estimated_questions = max(2, len(text) // 400)
         num_conceptual = int(estimated_questions * 0.5)
         num_mathematical = int(estimated_questions * 0.25)
         num_application = estimated_questions - num_conceptual - num_mathematical
 
         all_mcqs = []
-
-        # Generate for each category with lightweight prompt
         for category, target_count in [
             ('Conceptual', num_conceptual),
             ('Mathematical', num_mathematical),
@@ -211,23 +250,14 @@ class PDFExtractor(BaseExtractor):
             if target_count == 0:
                 continue
 
-            # Use lightweight prompt without few-shot examples
             prompt = self._get_lightweight_prompt(category, text, target_count)
-
-            # Call LLM with retry
             response = await self._call_llm_with_retry(prompt)
             if not response:
                 continue
 
-            # Parse JSON response
             mcqs_data = self._parse_llm_response(response)
-
-            # Limit to target count
             mcqs_data = mcqs_data[:target_count]
-
-            # Create MCQ objects with answer shuffling
             for data in mcqs_data:
-                # Ensure category matches what was requested
                 data['category'] = category
                 mcq = self._create_mcq_with_shuffle(data, source)
                 if mcq:
@@ -235,9 +265,54 @@ class PDFExtractor(BaseExtractor):
 
         return all_mcqs
 
+    def _get_answer_verification_prompt(self, content: str) -> str:
+        """
+        Prompt for content that already has questions + options but NO embedded answer key.
+
+        The LLM's job here is NOT to generate — it is to:
+        1. Extract each question and its options exactly as written
+        2. Use its own knowledge to determine the correct answer
+        3. Write a clear explanation justifying the correct answer
+
+        This is the fix for the core failure mode: the LLM was being asked to "generate"
+        when questions already existed, so it ignored them and made up wrong answers.
+        """
+        return f"""You are an expert AI/ML educator. The following content contains multiple-choice questions with options but NO answer key.
+
+Your job for EACH question:
+1. Copy the question text and all four options EXACTLY as written — do not rephrase
+2. Use your knowledge to determine which option is CORRECT
+3. Write a concise explanation (2-3 sentences) justifying why that answer is correct and why the others are wrong
+4. Assign: category (Conceptual/Mathematical/Application), topic (AI/ML/Data Science/System Design), difficulty (Easy/Medium/Hard)
+
+CONTENT:
+{content}
+
+Rules:
+- NEVER guess randomly — reason through each question carefully using your knowledge
+- The correct_answer must be the letter (A/B/C/D) of the genuinely correct option
+- If a question has option (a)/(b)/(c)/(d) format, map them to A/B/C/D in order
+- Do not skip any question
+- Return ONLY a valid JSON array, no markdown fencing
+
+[
+  {{
+    "question_text": "...",
+    "option_a": "...",
+    "option_b": "...",
+    "option_c": "...",
+    "option_d": "...",
+    "correct_answer": "B",
+    "explanation": "Option B is correct because... Options A, C, and D are wrong because...",
+    "category": "Conceptual",
+    "topic": "ML",
+    "difficulty": "Medium"
+  }}
+]"""
+
     def _get_lightweight_prompt(self, category: str, content: str, target_count: int) -> str:
         """
-        Generate lightweight extraction prompt without few-shot examples.
+        Generation prompt for prose content with no existing questions.
         Avoids 413 Payload Too Large errors by minimizing prompt size.
         """
         category_desc = {
@@ -336,13 +411,12 @@ Return ONLY valid JSON array, no additional text."""
                 return None
 
             correct_idx = ord(correct_letter) - ord('A')
-            correct_text = options[correct_idx]
 
-            # Shuffle all options randomly (fixes always-C bias)
-            random.shuffle(options)
-
-            # Find where the correct answer landed after shuffle
-            new_correct_idx = options.index(correct_text)
+            # Shuffle by index so duplicate option text can't mismatch the correct answer
+            indices = list(range(4))
+            random.shuffle(indices)
+            options = [options[i] for i in indices]
+            new_correct_idx = indices.index(correct_idx)
             new_correct_letter = chr(ord('A') + new_correct_idx)
 
             # Validate category
@@ -505,6 +579,64 @@ Return ONLY valid JSON array, no additional text."""
                     start = None
 
         return objects
+
+    def _parse_tabular_mcqs(self, text: str, source: str) -> List[MCQ]:
+        """
+        Parse MCQs from tab-separated table format: Question\tA\tB\tC\tD\tCorrect
+        This is the format produced by pdfplumber when the PDF stores MCQs in a table
+        (e.g. kumarsir WordPress exports, many textbook PDFs).
+
+        Detection: at least 5 tab-separated fields per line, last field is A/B/C/D.
+        """
+        import uuid
+        from datetime import datetime
+
+        mcqs = []
+        lines = text.split('\n')
+
+        for line in lines:
+            parts = [p.strip() for p in line.split('\t')]
+            if len(parts) < 6:
+                continue
+
+            # Last field must be a valid answer letter
+            answer_letter = parts[-1].strip().upper()
+            if answer_letter not in ('A', 'B', 'C', 'D'):
+                continue
+
+            # First field is question (skip UUID-looking first fields if present)
+            q_idx = 0
+            if re.match(r'^[0-9a-f\-]{8,}$', parts[0], re.IGNORECASE):
+                q_idx = 1  # first column is an ID
+
+            if q_idx + 4 >= len(parts):
+                continue
+
+            question_text = parts[q_idx].strip()
+            option_a = parts[q_idx + 1].strip()
+            option_b = parts[q_idx + 2].strip()
+            option_c = parts[q_idx + 3].strip()
+            option_d = parts[q_idx + 4].strip()
+
+            if not question_text or not option_a or not option_b or not option_c or not option_d:
+                continue
+            if len(question_text) < 10:
+                continue
+
+            mcq = MCQ(
+                question_id=str(uuid.uuid4()),
+                question_text=question_text,
+                option_a=option_a,
+                option_b=option_b,
+                option_c=option_c,
+                option_d=option_d,
+                correct_answer=answer_letter,
+                source=source,
+                date_added=datetime.now(),
+            )
+            mcqs.append(mcq)
+
+        return mcqs
 
     def _parse_mcq_text(self, text: str, source: str) -> List[MCQ]:
         """

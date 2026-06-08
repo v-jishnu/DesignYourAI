@@ -332,15 +332,16 @@ class ContentGenerator:
                 self.logger.warning(f"Invalid category: {category}, defaulting to Conceptual")
                 category = 'Conceptual'
 
-            # Shuffle answer positions in code (fixes always-C LLM bias)
+            # Shuffle answer positions (fixes always-C LLM bias).
+            # Track by index, not text, to avoid wrong mapping when options share text.
             options = [data['option_a'].strip(), data['option_b'].strip(),
                        data['option_c'].strip(), data['option_d'].strip()]
             correct_idx = ord(correct_answer) - ord('A')
-            correct_text = options[correct_idx]
 
-            random.shuffle(options)
-
-            new_correct_idx = options.index(correct_text)
+            indices = list(range(4))
+            random.shuffle(indices)
+            options = [options[i] for i in indices]
+            new_correct_idx = indices.index(correct_idx)
             correct_answer = chr(ord('A') + new_correct_idx)
 
             # Create MCQ
