@@ -20,6 +20,8 @@ Common errors, what they mean, and how to fix them. Every error listed here was 
 12. [GitHub API 403 rate limit](#12-github-api-403-rate-limit)
 13. ["0 pairs parsed, falling back to prose"](#13-0-pairs-parsed-falling-back-to-prose)
 14. ["nan" strings appearing in Excel](#14-nan-strings-appearing-in-excel)
+15. [Evaluator shows all rows as INVALID_INPUT](#15-evaluator-shows-all-rows-as-invalid_input)
+16. [Evaluator is very slow](#16-evaluator-is-very-slow)
 
 ---
 
@@ -410,6 +412,81 @@ If you have an old Excel file with `"nan"` strings:
 6. Save
 
 Or delete the file and regenerate from your sources.
+
+---
+
+## 15. Evaluator shows all rows as INVALID_INPUT
+
+**Symptom:**
+```
+[1/20] INVALID_INPUT  stored=? llm=? conf=0.00  What is the primary purpose...
+[2/20] INVALID_INPUT  stored=? llm=? conf=0.00  ...
+```
+
+**What it means:**
+Every row being flagged as INVALID_INPUT means the rows being evaluated are missing required fields (Option_A through Option_D). This is not a code error -- it means those rows in the Excel file genuinely do not have options populated.
+
+This happens most commonly when you run `--limit N` without `--sample`, because the first rows in the default KB were ingested from a source that only captured question text and left options blank.
+
+**Fix:**
+
+Run with `--sample` to hit a representative cross-section instead of the first N rows:
+
+```bash
+python run_eval.py --sample 0.1 --verbose
+```
+
+Or skip to a known-good section of the file:
+
+```bash
+# Use --no-cache and --sample together to get a clean sample of populated rows
+python run_eval.py --sample 0.2 --no-cache
+```
+
+To find and fix the broken rows in your KB: open the Excel file, filter for rows where Option_A is blank, and either delete them or re-ingest the source.
+
+---
+
+## 16. Evaluator is very slow
+
+**Symptom:**
+The evaluator has been running for a long time and only a few rows have been judged.
+
+**What it means:**
+With local Ollama at the default concurrency of 2, evaluating a full 1000-row KB takes 1-2 hours depending on your hardware. This is expected -- each row requires one LLM call.
+
+**Fix:**
+
+Option 1 -- **Switch to a fast free API** (recommended):
+
+```
+# .env
+LLM_PROVIDER=groq
+GROQ_API_KEY=gsk_...
+```
+
+```bash
+python run_eval.py --concurrency 6
+```
+
+Groq's free tier (llama-3.3-70b-versatile) is significantly faster than local Ollama and has a generous rate limit. A 586-row KB takes approximately 5-10 minutes instead of 30-40.
+
+Option 2 -- **Evaluate a sample first**, then run full only if sample looks good:
+
+```bash
+python run_eval.py --sample 0.1 --verbose    # 10% sample, ~4 minutes on Ollama
+python run_eval.py                           # full run if sample pass rate is acceptable
+```
+
+The resume cache means you do not lose work from the sample run -- the full run will skip rows already judged.
+
+Option 3 -- **Raise Ollama concurrency** if you have enough VRAM:
+
+```bash
+python run_eval.py --concurrency 4
+```
+
+This is only safe if your GPU has enough memory to run 4 concurrent contexts of qwen2.5:7b (approximately 16GB VRAM). Monitor GPU memory with `nvidia-smi`.
 
 ---
 

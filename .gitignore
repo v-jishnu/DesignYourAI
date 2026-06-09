@@ -41,6 +41,8 @@ logs/*.log
 data/raw/*
 !data/raw/.gitkeep
 data/knowledge_base/*.xlsx
+data/knowledge_base/*.json
+data/knowledge_base/*.jsonl
 !data/knowledge_base/.gitkeep
 
 # Test
