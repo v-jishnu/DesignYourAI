@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<mcqs>
+  <mcq>
+    <question_text>When designing a high-throughput distributed system, how does deploying a reverse proxy like NGINX impact overall network latency and load balancing trade-offs across application servers?</question_text>
+    <option_a>It compresses static content, balances requests, and offloads SSL termination tasks.</option_a>
+    <option_b>It functions as an in-memory key-value cache to store session attributes.</option_b>
+    <option_c>It acts as an asynchronous scheduler to coordinate machine learning training.</option_c>
+    <option_d>It executes complex relational database transactions to ensure consistency.</option_d>
+    <correct_answer>A</correct_answer>
+    <explanation>Option B is correct because NGINX compresses static content, balances requests across application servers, and offloads SSL termination tasks. Options A, C, and D are incorrect because they describe functionalities that do not pertain to the primary role of a reverse proxy like NGINX.</explanation>
+    <category>Application</category>
+    <topic>System Design</topic>
+    <difficulty>Medium</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+</mcqs>

@@ -47,7 +47,7 @@ def _parse_args() -> argparse.Namespace:
     src = parser.add_mutually_exclusive_group()
     src.add_argument("--url", help="Public URL to ingest (any site, or a GitHub repo)")
     src.add_argument("--pdf", help="Path to a local PDF file")
-    src.add_argument("--file", help="Path to a local .md / .txt / .docx file")
+    src.add_argument("--file", help="Path to a local .md / .txt / .docx / .xml / .json file")
     src.add_argument("--batch", help="Path to a text file with one source per line")
 
     parser.add_argument(
@@ -64,6 +64,10 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output",
         help="Override output Excel path (defaults to settings.EXCEL_PATH)",
+    )
+    parser.add_argument(
+        "--dump-draft",
+        help="Path to dump extracted and classified questions (JSON or XML) instead of writing to Excel. Bypasses deduplication.",
     )
 
     return parser.parse_args()
@@ -241,6 +245,93 @@ def _print_results(results: dict, output_path: Path) -> None:
     print("=" * 70 + "\n")
 
 
+def _dump_to_json(mcqs: list, path: Path):
+    import json
+    cleaned_data = []
+    for mcq in mcqs:
+        cleaned_item = {
+            "question_text": mcq.question_text,
+            "option_a": mcq.option_a,
+            "option_b": mcq.option_b,
+            "option_c": mcq.option_c,
+            "option_d": mcq.option_d,
+            "correct_answer": mcq.correct_answer,
+            "explanation": mcq.explanation,
+            "category": mcq.category,
+            "topic": mcq.topic,
+            "difficulty": mcq.difficulty,
+            "company": mcq.company,
+            "job_roles": mcq.job_roles
+        }
+        cleaned_data.append(cleaned_item)
+    path.write_text(json.dumps(cleaned_data, indent=2), encoding="utf-8")
+
+
+def _dump_to_xml(mcqs: list, path: Path):
+    import xml.etree.ElementTree as ET
+    import xml.dom.minidom
+    root = ET.Element("mcqs")
+    for mcq in mcqs:
+        mcq_elem = ET.SubElement(root, "mcq")
+        
+        def add_child(parent, tag, val):
+            child = ET.SubElement(parent, tag)
+            child.text = str(val) if val is not None else ""
+
+        add_child(mcq_elem, "question_text", mcq.question_text)
+        add_child(mcq_elem, "option_a", mcq.option_a)
+        add_child(mcq_elem, "option_b", mcq.option_b)
+        add_child(mcq_elem, "option_c", mcq.option_c)
+        add_child(mcq_elem, "option_d", mcq.option_d)
+        add_child(mcq_elem, "correct_answer", mcq.correct_answer)
+        add_child(mcq_elem, "explanation", mcq.explanation)
+        add_child(mcq_elem, "category", mcq.category)
+        add_child(mcq_elem, "topic", mcq.topic)
+        add_child(mcq_elem, "difficulty", mcq.difficulty)
+        add_child(mcq_elem, "company", mcq.company)
+        add_child(mcq_elem, "job_roles", mcq.job_roles)
+        
+    xml_str = ET.tostring(root, encoding="utf-8")
+    dom = xml.dom.minidom.parseString(xml_str)
+    pretty_xml = dom.toprettyxml(indent="  ")
+    path.write_text(pretty_xml, encoding="utf-8")
+
+
+async def _execute_dump_draft(sources: List[str], draft_path: Path, config: dict) -> int:
+    from agents.extraction_agent import ExtractionAgent
+    from agents.classification_agent import ClassificationAgent
+
+    print(f"\nDraft Mode: Extracting questions from {len(sources)} source(s)...")
+    ext_agent = ExtractionAgent(config)
+    mcqs = await ext_agent.execute(sources)
+    print(f"Extracted {len(mcqs)} question(s)")
+
+    if not mcqs:
+        print("No questions extracted. Cannot write draft.")
+        return 1
+
+    print("\nClassifying questions...")
+    class_agent = ClassificationAgent(config)
+    classified_mcqs = await class_agent.execute(mcqs)
+    print(f"Classified {len(classified_mcqs)} question(s)")
+
+    suffix = draft_path.suffix.lower()
+    try:
+        draft_path.parent.mkdir(parents=True, exist_ok=True)
+        if suffix == ".json":
+            _dump_to_json(classified_mcqs, draft_path)
+        elif suffix == ".xml":
+            _dump_to_xml(classified_mcqs, draft_path)
+        else:
+            print(f"Unsupported draft output format: {suffix}. Supported formats: .json, .xml")
+            return 1
+        print(f"\n[Success] Draft questions saved successfully to: {draft_path}\n")
+        return 0
+    except Exception as e:
+        print(f"Failed to write draft to {draft_path}: {e}")
+        return 1
+
+
 async def _main() -> int:
     args = _parse_args()
     setup_logging(settings.LOG_DIR, settings.LOG_LEVEL)
@@ -266,6 +357,10 @@ async def _main() -> int:
     if args.dry_run:
         await _dry_run(sources)
         return 0
+
+    if args.dump_draft:
+        draft_path = Path(args.dump_draft)
+        return await _execute_dump_draft(sources, draft_path, config)
 
     # Lazy import so --dry-run and --help don't pay the agent init cost
     from agents.ingestion_agent import IngestionAgent

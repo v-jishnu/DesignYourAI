@@ -1,0 +1,255 @@
+<?xml version="1.0" ?>
+<mcqs>
+  <mcq>
+    <question_text>Which design principle focuses on the ability to reason about trade-offs between different aspects of a system, such as consistency versus availability?</question_text>
+    <option_a>Microservices Architecture</option_a>
+    <option_b>Trade-off Reasoning</option_b>
+    <option_c>Monolithic Architecture</option_c>
+    <option_d>Rate Limiting</option_d>
+    <correct_answer>B</correct_answer>
+    <explanation>Trade-off reasoning is the process of evaluating and justifying choices between different design elements, such as consistency versus availability. This principle helps in making informed decisions that balance various non-functional requirements.</explanation>
+    <category>Conceptual</category>
+    <topic>System Design</topic>
+    <difficulty>Medium</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+  <mcq>
+    <question_text>In the context of high-level system design, which of the following best exemplifies a scenario where you would prioritize consistency over availability?</question_text>
+    <option_a>Developing a gaming service focusing on quick response times and high availability during peak hours.</option_a>
+    <option_b>Creating an e-commerce website needing to handle millions of concurrent users with minimal downtime.</option_b>
+    <option_c>Designing a real-time financial transaction processing system that requires strict adherence to rules and immediate updates across all nodes.</option_c>
+    <option_d>Building a social media platform aiming for maximum user engagement by allowing temporary data inconsistencies.</option_d>
+    <correct_answer>C</correct_answer>
+    <explanation>In financial transactions, strict rules and immediate updates are critical to maintaining the integrity of the system. Prioritizing consistency ensures that all nodes have the same data at any given time, which is essential for compliance and accurate record-keeping in such systems. While availability is important, it can be temporarily compromised if necessary to ensure consistency.</explanation>
+    <category>Application</category>
+    <topic>System Design</topic>
+    <difficulty>Hard</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+  <mcq>
+    <question_text>If a NoSQL database is designed to handle read-heavy operations with up to 2,000 requests per second and each request involves fetching data from multiple shards, how would you ensure that the database remains highly available while maintaining performance during peak loads?</question_text>
+    <option_a>Implement leader-follower replication for writes only</option_a>
+    <option_b>Increase the write capacity of the database by adding more replicas</option_b>
+    <option_c>Use consistent hashing for load distribution among nodes</option_c>
+    <option_d>Decrease the number of shards to reduce network latency</option_d>
+    <correct_answer>C</correct_answer>
+    <explanation>For read-heavy operations, ensuring high availability and performance during peak loads requires efficient load distribution. Consistent hashing is a technique that maps keys (like request IDs or user sessions) to specific nodes in a way that minimizes the number of moving parts when servers are added or removed, thus maintaining performance stability.</explanation>
+    <category>Application</category>
+    <topic>Data Science</topic>
+    <difficulty>Medium</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+  <mcq>
+    <question_text>Which sharding strategy would be most effective for ensuring data locality and compliance with regional laws, while also maintaining an even distribution of data across shards?</question_text>
+    <option_a>Consistent hashing with random key distribution</option_a>
+    <option_b>Hash-based sharding using a geographical hash function</option_b>
+    <option_c>Range-based sharding by user IDs</option_c>
+    <option_d>Geo-based sharding based on geographic regions</option_d>
+    <correct_answer>D</correct_answer>
+    <explanation>Geo-based sharding is effective for ensuring data locality and compliance with regional laws by splitting the data according to geographic regions. While range- and hash-based sharding can distribute data evenly, they do not inherently consider geographical constraints as well as geo-based sharding does.</explanation>
+    <category>Application</category>
+    <topic>System Design</topic>
+    <difficulty>Hard</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+  <mcq>
+    <question_text>Which of the following best describes the role of a reverse proxy in system design compared to a forward proxy?</question_text>
+    <option_a>A reverse proxy hides client's identity from the internet, while a forward proxy hides server details from clients.</option_a>
+    <option_b>A reverse proxy is used for load balancing and SSL termination, whereas a forward proxy can be used for bypassing network restrictions.</option_b>
+    <option_c>Reverse proxy sits behind the servers, while a forward proxy sits in front of clients, handling requests and responses differently.</option_c>
+    <option_d>Both proxies are primarily used to enhance security by encrypting data transit between client and server.</option_d>
+    <correct_answer>B</correct_answer>
+    <explanation>A reverse proxy typically handles load balancing, SSL termination, caching, and protects internal architecture. A forward proxy hides client's identity from the internet to protect user privacy or bypass geo-restrictions.</explanation>
+    <category>Conceptual</category>
+    <topic>System Design</topic>
+    <difficulty>Easy</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+  <mcq>
+    <question_text>In a distributed system using message queues for asynchronous communication, which of the following patterns would be most suitable for scenarios where multiple services need to process messages independently?</question_text>
+    <option_a>Publish-Subscribe (Pub/Sub) pattern</option_a>
+    <option_b>Caching with TTL strategy</option_b>
+    <option_c>Point-to-point queue</option_c>
+    <option_d>Round-robin distribution in a load balancer</option_d>
+    <correct_answer>A</correct_answer>
+    <explanation>The Publish-Subscribe (Pub/Sub) pattern allows multiple consumers to receive and process messages independently, making it ideal for scenarios where different services need to handle the same event or message.</explanation>
+    <category>Application</category>
+    <topic>System Design</topic>
+    <difficulty>Medium</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+  <mcq>
+    <question_text>In a caching system using the LRU (Least Recently Used) policy, if there are 100 items in the cache and a new item is added every minute while only 20 items are accessed per hour on average, how often will an item be evicted to make space for a new one assuming no other operations occur?</question_text>
+    <option_a>1 hour</option_a>
+    <option_b>30 minutes</option_b>
+    <option_c>5 minutes</option_c>
+    <option_d>2 hours</option_d>
+    <correct_answer>B</correct_answer>
+    <explanation>On average, 20 out of 100 items are accessed per hour. Thus, the total access rate is 20/60 minutes = 1/3 minute per item on average. Therefore, an item will be evicted roughly every 30 minutes to make space for a new one.</explanation>
+    <category>Mathematical</category>
+    <topic>Data Science</topic>
+    <difficulty>Easy</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+  <mcq>
+    <question_text>Which sharding strategy would be most suitable for a social media platform where users are spread across different geographical regions and the application needs to ensure data locality and regulatory compliance?</question_text>
+    <option_a>Geo-based sharding by region</option_a>
+    <option_b>Range-based sharding by user ID</option_b>
+    <option_c>Hash-based sharding with consistent hashing</option_c>
+    <option_d>A combination of range-based and hash-based sharding</option_d>
+    <correct_answer>A</correct_answer>
+    <explanation>Geo-based sharding is specifically designed to handle data based on geographical regions, which is ideal for a social media platform where user data needs to be localized. This approach ensures that users experience low latency when accessing their data and helps with compliance in different regions.</explanation>
+    <category>Application</category>
+    <topic>System Design</topic>
+    <difficulty>Hard</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+  <mcq>
+    <question_text>In the context of system design, which caching strategy would best handle scenarios where frequent writes to a database occur but you still need to minimize cache invalidation overhead?</question_text>
+    <option_a>Write-back caching with periodic flushing</option_a>
+    <option_b>TTL (Time to Live) with a short expiration period</option_b>
+    <option_c>LRU (Least Recently Used)</option_c>
+    <option_d>LFU (Least Frequently Used)</option_d>
+    <correct_answer>A</correct_answer>
+    <explanation>Write-back caching allows writes to be fast, as they are immediately stored in the cache. Periodic flushing ensures that eventually, all data is synchronized with the database, minimizing invalidation overhead and preventing stale data issues.</explanation>
+    <category>Conceptual</category>
+    <topic>Data Science</topic>
+    <difficulty>Medium</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+  <mcq>
+    <question_text>When designing a distributed system for asynchronous communication between services, which pattern would be most appropriate if you need to ensure that each message is processed exactly once but do not require the order of processing to match the order of sending?</question_text>
+    <option_a>Point-to-point queue with RabbitMQ</option_a>
+    <option_b>Point-to-point queue</option_b>
+    <option_c>Publish-Subscribe (Pub/Sub) with Kafka topics</option_c>
+    <option_d>Publish-Subscribe (Pub/Sub) with SNS</option_d>
+    <correct_answer>C</correct_answer>
+    <explanation>The Publish-Subscribe pattern ensures that messages are delivered to all interested subscribers, making it suitable for scenarios where each message should be processed once but the order of processing does not need to be sequential. Kafka and SNS are commonly used for this pattern.</explanation>
+    <category>Application</category>
+    <topic>System Design</topic>
+    <difficulty>Medium</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+  <mcq>
+    <question_text>In the context of the CAP theorem, which scenario is most likely to prioritize 'Availability' over 'Consistency'? Provide a reasoning based on the given content.</question_text>
+    <option_a>A system handling real-time financial transactions with strict audit trails</option_a>
+    <option_b>A database system used for storing transaction records in a bank</option_b>
+    <option_c>A social media platform where posts are frequently updated and viewed by many users simultaneously</option_c>
+    <option_d>A highly reliable weather data collection network that needs to report accurate information at all times</option_d>
+    <correct_answer>C</correct_answer>
+    <explanation>In a social media platform, it's crucial for users to receive updates as quickly as possible, even if the latest data might occasionally be stale. This is characteristic of an AP system which prioritizes Availability over Consistency.</explanation>
+    <category>Conceptual</category>
+    <topic>System Design</topic>
+    <difficulty>Medium</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+  <mcq>
+    <question_text>What technique would be most appropriate to ensure fault tolerance in a microservices architecture, according to the provided content? Provide an explanation based on the given information.</question_text>
+    <option_a>Using rate limiting to control client requests</option_a>
+    <option_b>Designing services with strict coupling for better performance</option_b>
+    <option_c>Implementing redundant instances of each service</option_c>
+    <option_d>Optimizing API gateways for faster response times</option_d>
+    <correct_answer>C</correct_answer>
+    <explanation>Running multiple instances of a service ensures fault tolerance by allowing the system to continue operating even if some components fail. This is a common technique in microservices architecture.</explanation>
+    <category>Application</category>
+    <topic>System Design</topic>
+    <difficulty>Medium</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+  <mcq>
+    <question_text>How does an API Gateway enhance the resilience and scalability of a microservices-based application, as described in the content? Explain your answer.</question_text>
+    <option_a>By increasing the number of direct client-service interactions for better performance</option_a>
+    <option_b>By routing traffic to the most available service instance when a primary fails</option_b>
+    <option_c>By implementing strict consistency across all services through centralized management</option_c>
+    <option_d>By reducing the overall complexity of microservices architecture</option_d>
+    <correct_answer>B</correct_answer>
+    <explanation>An API Gateway acts as a single entry point that routes client requests to appropriate service instances, handling concerns like authentication and rate limiting. It can automatically route traffic to backup services when primary ones fail, enhancing resilience.</explanation>
+    <category>Application</category>
+    <topic>System Design</topic>
+    <difficulty>Easy</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+  <mcq>
+    <question_text>Which of the following best describes how circuit breaker patterns are used in a microservices architecture, based on the provided content? Explain your reasoning.</question_text>
+    <option_a>To optimize data storage and retrieval in distributed systems</option_a>
+    <option_b>To increase the rate of service calls to improve system performance</option_b>
+    <option_c>To guarantee strong consistency across all services during network partitions</option_c>
+    <option_d>To ensure all services remain constantly available by preventing failures from cascading</option_d>
+    <correct_answer>D</correct_answer>
+    <explanation>Circuit breaker patterns stop failing downstream service calls temporarily, preventing cascading failures. This is a key technique for maintaining system resilience and fault tolerance.</explanation>
+    <category>Conceptual</category>
+    <topic>System Design</topic>
+    <difficulty>Medium</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+  <mcq>
+    <question_text>In a distributed database system that prioritizes availability over consistency (AP system), which of the following scenarios best illustrates its behavior during a network partition?</question_text>
+    <option_a>Reads return the most recent data available from any node, even if it's not the latest write to maintain availability.</option_a>
+    <option_b>The system continues to operate normally even when some nodes are isolated by the partition, and responses might be slow but not error messages.</option_b>
+    <option_c>Writes block until a quorum of nodes confirms the update, then all nodes receive an update, maintaining consistency.</option_c>
+    <option_d>Read operations always return the latest write immediately, ensuring data is up-to-date across all nodes.</option_d>
+    <correct_answer>A</correct_answer>
+    <explanation>An AP system prioritizes availability and accepts temporarily stale data. Therefore, during a network partition, reads should still be able to retrieve some data, even if it is not the latest version, to ensure the overall system remains responsive (Option D). Option A describes strong consistency, which is CP-focused; Options B and C describe systems that prioritize consistency over availability.</explanation>
+    <category>Conceptual</category>
+    <topic>ML</topic>
+    <difficulty>Hard</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+  <mcq>
+    <question_text>In a scenario where you are designing a financial transaction system that requires strong consistency to ensure accuracy of transactions, which architectural choice would be most appropriate according to the CAP theorem?</question_text>
+    <option_a>A CP (Consistency and Partition Tolerance) system like HBase</option_a>
+    <option_b>A hybrid approach that uses eventual consistency for faster availability</option_b>
+    <option_c>An AP (Availability and Partition Tolerance) system like Cassandra</option_c>
+    <option_d>A distributed database with strong consistency guarantees, such as a traditional relational database in strict mode</option_d>
+    <correct_answer>D</correct_answer>
+    <explanation>For financial transactions, ensuring the correct state of data is crucial. Therefore, a CP system like a traditional relational database in strict mode would be the most appropriate choice to guarantee that every read returns the latest write without error, even during network partitions.</explanation>
+    <category>Conceptual</category>
+    <topic>ML</topic>
+    <difficulty>Easy</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+  <mcq>
+    <question_text>In the context of high-level system design (HLD), which step is primarily focused on defining the overall architecture and major components of a system?</question_text>
+    <option_a>1. Clarify requirements</option_a>
+    <option_b>4. Design the high-level architecture</option_b>
+    <option_c>2. Estimate scale</option_c>
+    <option_d>3. Define the API/interface</option_d>
+    <correct_answer>B</correct_answer>
+    <explanation>Step 4 is specifically about defining the high-level architecture, which involves drawing major components such as client, load balancer, services, database, cache, and queue, and how data flows between them.</explanation>
+    <category>Application</category>
+    <topic>System Design</topic>
+    <difficulty>Easy</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+  <mcq>
+    <question_text>In a machine learning model with stochastic gradient descent (SGD), if the learning rate is set too high, which of the following issues might occur?</question_text>
+    <option_a>The model may oscillate around the minimum, failing to converge or converging very slowly.</option_a>
+    <option_b>SGD guarantees faster convergence regardless of learning rate, so there is no effect.</option_b>
+    <option_c>The model will converge to the global minimum smoothly and quickly.</option_c>
+    <option_d>Learning rate has no impact on the model's convergence in SGD.</option_d>
+    <correct_answer>A</correct_answer>
+    <explanation>A high learning rate can cause the updates to overshoot the minimum, leading to oscillations. This can result in the model failing to converge or converging very slowly as it might keep missing the optimal values. Conversely, a too low learning rate might slow down convergence significantly but will eventually find the optimum.</explanation>
+    <category>Mathematical</category>
+    <topic>ML</topic>
+    <difficulty>Medium</difficulty>
+    <company/>
+    <job_roles/>
+  </mcq>
+</mcqs>

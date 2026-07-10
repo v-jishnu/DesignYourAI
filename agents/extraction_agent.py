@@ -12,6 +12,8 @@ from extractors.pdf_extractor import PDFExtractor
 from extractors.docx_extractor import DOCXExtractor
 from extractors.stratascratch_extractor import StrataScratchExtractor
 from extractors.github_markdown_extractor import GitHubMarkdownExtractor
+from extractors.structured_file_extractor import StructuredFileExtractor
+from extractors.markdown_txt_extractor import MarkdownTxtExtractor
 
 
 class ExtractionAgent(BaseAgent):
@@ -51,6 +53,8 @@ class ExtractionAgent(BaseAgent):
             'docx': DOCXExtractor(config, llm_client=self.llm_client),
             'stratascratch': StrataScratchExtractor(config, llm_client=self.llm_client),
             'github': GitHubMarkdownExtractor(config, llm_client=self.llm_client),
+            'structured': StructuredFileExtractor(config, llm_client=self.llm_client),
+            'markdown_txt': MarkdownTxtExtractor(config, llm_client=self.llm_client),
         }
 
     async def execute(self, sources: List[Union[str, Path]]) -> List[MCQ]:
@@ -96,6 +100,10 @@ class ExtractionAgent(BaseAgent):
             return self.extractors['pdf']
         elif source_str.endswith('.docx'):
             return self.extractors['docx']
+        elif source_str.endswith(('.md', '.markdown', '.txt')):
+            return self.extractors['markdown_txt']
+        elif source_str.endswith('.xml') or source_str.endswith('.json'):
+            return self.extractors['structured']
         elif source_str.startswith('http'):
             # Web extractor for HTML pages
             return self.extractors['web']

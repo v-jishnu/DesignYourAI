@@ -165,6 +165,12 @@ python run_ingest.py --pdf data/raw/interview-prep.pdf
 # Local .md / .txt / .docx
 python run_ingest.py --file notes.md
 
+# Decouple extraction: extract and save questions to a draft JSON/XML file (Human-in-the-Loop)
+python run_ingest.py --pdf data/raw/interview-prep.pdf --dump-draft data/processed/draft.json
+
+# Ingest intermediate XML/JSON files into the main database
+python run_ingest.py --file data/processed/draft.json
+
 # Batch file (one source per line, # comments allowed)
 python run_ingest.py --batch sources.txt
 
@@ -183,6 +189,8 @@ python run_ingest.py --url https://... --output data/knowledge_base/custom.xlsx
 | Generic public URL | `WebExtractor` | 3-tier cascade: static HTML → Playwright → LLM generation |
 | `.pdf` file or URL | `PDFExtractor` | pdfplumber + LLM fallback |
 | `.docx` file | `DOCXExtractor` | python-docx + LLM fallback |
+| `.md` or `.txt` file | `MarkdownTxtExtractor` | Plain text parse + LLM fallback (excellent for clean, layout-free text extraction) |
+| `.xml` or `.json` file | `StructuredFileExtractor` | Decoupled structured MCQ representation (useful for layout-heavy PDFs or review processes) |
 | StrataScratch | `StrataScratchExtractor` | GraphQL API (still use `run_stratascratch.py` for full runs) |
 
 ### What it does NOT support

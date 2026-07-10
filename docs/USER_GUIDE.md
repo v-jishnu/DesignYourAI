@@ -188,12 +188,18 @@ PDFs are handled with three extraction paths tried in order:
 3. **LLM extraction** -- if neither of the above succeeds, the full text is sent to the LLM with the appropriate prompt (preserve answers / reason answers / generate, based on what was detected)
 
 ### Ingest from a local file
-
+ 
 ```bash
 python run_ingest.py --file notes.md
 python run_ingest.py --file interview-questions.txt
 python run_ingest.py --file report.docx
 ```
+
+Local files are handled depending on their formats:
+1. **Plain Text / Markdown (`.md`, `.markdown`, `.txt`):** Routed to `MarkdownTxtExtractor`. If they contain structured questions with options (e.g. A) B) C) D)), the regex parser extracts them directly. If they contain prose/notes, the engine automatically runs LLM-based smart generation to extract clean MCQs.
+2. **Word Documents (`.docx`):** Routed to `DOCXExtractor` which extracts text from paragraphs and tables, followed by regex or LLM cascade.
+3. **XML/JSON Drafts (`.xml`, `.json`):** Routed to `StructuredFileExtractor` for static ingestion of human-vetted files.
+
 
 ### Batch mode (multiple sources at once)
 
@@ -257,6 +263,71 @@ python run_ingest.py --url https://... --output data/knowledge_base/custom_kb.xl
 ```
 
 Default output: `data/knowledge_base/mcq_knowledge_base.xlsx`
+
+### Intermediate XML & JSON Support (Decoupled Flow & Human-in-the-Loop Vetting)
+
+If you have a complex PDF layout, dynamic website structure, or want to review/edit questions before they enter the final Excel database, you can use the decoupled structured XML/JSON pipeline.
+
+#### Step 1: Dump raw/classified draft to an intermediate file
+To extract and classify questions from a source without writing them to Excel or running deduplication, use the `--dump-draft` parameter with either a `.json` or `.xml` extension:
+```bash
+python run_ingest.py --pdf data/raw/messy_questions.pdf --dump-draft data/processed/draft.json
+# or
+python run_ingest.py --pdf data/raw/messy_questions.pdf --dump-draft data/processed/draft.xml
+```
+
+#### Step 2: Human-in-the-Loop Review (Optional)
+Open the generated draft file in any editor. You can correct typos, update options, adjust the correct answer key, add company/metadata fields, or delete bad questions.
+
+#### Step 3: Ingest the draft file into the main database
+Pass the verified JSON or XML file directly to `--file` (which routes automatically to the static `StructuredFileExtractor`):
+```bash
+python run_ingest.py --file data/processed/draft.json
+# or
+python run_ingest.py --file data/processed/draft.xml
+```
+
+#### Structured File Schemas
+
+##### JSON Schema
+```json
+[
+  {
+    "question_text": "Which optimization algorithm is commonly used to train neural networks by updating weights iteratively?",
+    "option_a": "Stochastic Gradient Descent",
+    "option_b": "K-Means Clustering",
+    "option_c": "Principal Component Analysis",
+    "option_d": "Decision Trees",
+    "correct_answer": "A",
+    "explanation": "Stochastic Gradient Descent is a popular optimization algorithm for neural networks.",
+    "category": "Conceptual",
+    "topic": "ML",
+    "difficulty": "Easy",
+    "company": "Google",
+    "job_roles": "Machine Learning Engineer"
+  }
+]
+```
+
+##### XML Schema
+```xml
+<mcqs>
+  <mcq>
+    <question_text>Which optimization algorithm is commonly used to train neural networks by updating weights iteratively?</question_text>
+    <option_a>Stochastic Gradient Descent</option_a>
+    <option_b>K-Means Clustering</option_b>
+    <option_c>Principal Component Analysis</option_c>
+    <option_d>Decision Trees</option_d>
+    <correct_answer>A</correct_answer>
+    <explanation>Stochastic Gradient Descent is a popular optimization algorithm for neural networks.</explanation>
+    <category>Conceptual</category>
+    <topic>ML</topic>
+    <difficulty>Easy</difficulty>
+    <company>Google</company>
+    <job_roles>Machine Learning Engineer</job_roles>
+  </mcq>
+</mcqs>
+```
 
 ---
 
